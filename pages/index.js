@@ -1,10 +1,31 @@
-import styled from 'styled-components'
-
-const Title = styled.h1`
-  font-size: 50px;
-  color: ${({ theme }) => theme.colors.primary};
-`
+import PostList, {
+  ALL_POSTS_QUERY,
+  allPostsQueryVars,
+} from '../components/PostList'
+import { initializeApollo } from '../lib/apolloClient'
+import Title from '../components/Title'
 
 export default function Home() {
-  return <Title>PokeBank</Title>
+  return (
+    <div>
+      <Title>PokeBank</Title>
+      <PostList />
+    </div>
+  )
+}
+
+export async function getStaticProps() {
+  const apolloClient = initializeApollo()
+
+  await apolloClient.query({
+    query: ALL_POSTS_QUERY,
+    variables: allPostsQueryVars,
+  })
+
+  return {
+    props: {
+      initialApolloState: apolloClient.cache.extract(),
+    },
+    unstable_revalidate: 1,
+  }
 }

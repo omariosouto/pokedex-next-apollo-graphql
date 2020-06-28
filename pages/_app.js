@@ -1,5 +1,9 @@
 import App from 'next/app'
+import { ApolloProvider } from '@apollo/react-hooks'
 import { ThemeProvider } from 'styled-components'
+
+import { useApollo } from '../lib/apolloClient'
+
 
 const theme = {
   colors: {
@@ -7,13 +11,14 @@ const theme = {
   },
 }
 
-export default class MyApp extends App {
-  render() {
-    const { Component, pageProps } = this.props
-    return (
+export default function MyApp({ Component, pageProps }) {
+  const apolloClient = useApollo(pageProps.initialApolloState)
+
+  return (
+    <ApolloProvider client={apolloClient}>
       <ThemeProvider theme={theme}>
         <Component {...pageProps} />
       </ThemeProvider>
-    )
-  }
+    </ApolloProvider>
+  )
 }
