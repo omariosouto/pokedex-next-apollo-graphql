@@ -3,7 +3,7 @@ import { useQuery, gql } from '@apollo/client';
 import Link from 'next/link';
 import { apolloClientBuilder } from '../infra/apolloClientBuilder';
 
-const ALL_COUNTRIES = gql`
+const POKEMONS_FIRST_150 = gql`
   query {
     pokemons(first: 150) {
       name
@@ -12,7 +12,7 @@ const ALL_COUNTRIES = gql`
 `;
 
 export default function Home({ initialData }) {
-  // const { loading, error, data } = useQuery(ALL_COUNTRIES);
+  // const { loading, error, data } = useQuery(POKEMONS_FIRST_150);
   // if(loading) return (<p>Cargando...</p>)
   // if(error) return (<p>Faiou :(</p>)
   // console.log('data', data);
@@ -45,7 +45,7 @@ export async function getStaticProps() {
   const apolloClient = apolloClientBuilder();
 
   const pokemonsQuery = {
-    query: ALL_COUNTRIES
+    query: POKEMONS_FIRST_150
   };
 
   await apolloClient.query(pokemonsQuery)
@@ -56,5 +56,28 @@ export async function getStaticProps() {
         pokemons: apolloClient.cache.readQuery(pokemonsQuery)
       },
     },
+  }
+}
+
+
+function PokemonsRepository() {
+  const POKEMON_NAMES = gql`
+    query {
+      pokemons($first: Int!) {
+        name
+      }
+    }
+  `;
+
+
+  return {
+    getFirst(first = 150) {
+      const queryStructure = {
+        query: POKEMON_NAMES,
+        variables: {
+          first
+        }
+      } 
+    }
   }
 }
