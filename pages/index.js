@@ -1,31 +1,60 @@
-import PostList, {
-  ALL_POSTS_QUERY,
-  allPostsQueryVars,
-} from '../components/PostList'
-import { initializeApollo } from '../lib/apolloClient'
-import Title from '../components/Title'
+import React from 'react';
+import { useQuery, gql } from '@apollo/client';
+import Link from 'next/link';
+import { apolloClientBuilder } from '../infra/apolloClientBuilder';
 
-export default function Home() {
+const ALL_COUNTRIES = gql`
+  query {
+    pokemons(first: 150) {
+      name
+    }
+  }
+`;
+
+export default function Home({ initialData }) {
+  // const { loading, error, data } = useQuery(ALL_COUNTRIES);
+  // if(loading) return (<p>Cargando...</p>)
+  // if(error) return (<p>Faiou :(</p>)
+  // console.log('data', data);
+
+  console.log('initialData', initialData)
+
   return (
     <div>
-      <Title>PokeBank</Title>
-      <PostList />
+      <h1>PokeBank</h1>
+      <Link href="/about">
+        <a>
+          Sobre?
+        </a>
+      </Link>
+      
+      {initialData.pokemons.map((country) => {
+        return (
+          <li key={country.name}>
+            {country.name}
+          </li>
+        )
+      })}
     </div>
-  )
-}
-
+     ) 
+ } 
+                         
 export async function getStaticProps() {
-  const apolloClient = initializeApollo()
+  // Fazer uma abstração repository que da a opção de pegar a versão cacheada 
+  // Quando constrói com um client passado.
+  const apolloClient = apolloClientBuilder();
 
-  await apolloClient.query({
-    query: ALL_POSTS_QUERY,
-    variables: allPostsQueryVars,
-  })
+  const pokemonsQuery = {
+    query: ALL_COUNTRIES
+  };
+
+  await apolloClient.query(pokemonsQuery)
 
   return {
     props: {
-      initialApolloState: apolloClient.cache.extract(),
+      initialData: {
+        pokemons: apolloClient.cache.readQuery(pokemonsQuery)
+      },
     },
-    unstable_revalidate: 1,
   }
 }
